@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEBP to JPG Converter</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #71b7e6, #9b59b6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #fff;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease-in-out;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        label {
+            background: #4CAF50;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        label:hover {
+            background: #45a049;
+        }
+        button, .download-link {
+            background: #007BFF;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-left: 10px;
+        }
+        button:hover, .download-link:hover {
+            background: #0056b3;
+        }
+        canvas {
+            display: none;
+        }
+        .container.uploading {
+            transform: scale(1.05);
+        }
+        .container.converting {
+            transform: scale(1.05);
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1.05); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <h1>WEBP to JPG Converter</h1>
+        <input type="file" id="upload" accept=".webp">
+        <label for="upload">Choose WEBP File</label>
+        <button id="convertButton">Convert to JPG</button>
+        <canvas id="canvas"></canvas>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const uploadInput = document.getElementById('upload');
+        const convertButton = document.getElementById('convertButton');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const resultDiv = document.getElementById('result');
+        const container = document.getElementById('container');
+
+        uploadInput.addEventListener('change', () => {
+            container.classList.add('uploading');
+            setTimeout(() => {
+                container.classList.remove('uploading');
+            }, 500);
+        });
+
+        convertButton.addEventListener('click', () => {
+            if (!uploadInput.files[0]) {
+                alert('Please select a WEBP file first!');
+                return;
+            }
+
+            container.classList.add('converting');
+
+            const file = uploadInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    const jpgUrl = canvas.toDataURL('image/jpeg');
+                    const link = document.createElement('a');
+                    link.href = jpgUrl;
+                    link.download = 'converted.jpg';
+                    link.innerText = 'Download JPG';
+                    link.className = 'download-link';
+                    link.style.marginLeft = "10px";
+                    convertButton.replaceWith(link);
+
+                    container.classList.remove('converting');
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    </script>
+</body>
+</html>
